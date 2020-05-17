@@ -27,6 +27,8 @@ const int brushlessMotor3_3LowSpeed = 1000;  //Starting speed
 const int brushlessMotor3_3FastSpeed = 2000; //Top speed
 const int brushlessMotor4_4LowSpeed = 1000;  //Starting speed
 const int brushlessMotor4_4FastSpeed = 2000; //Top speed
+const int testMaxSpeed = 500;
+const int testLowSpeed = 100;
 // object initialization
 Servo brushlessMotor1_1;
 Servo brushlessMotor2_2;
@@ -34,12 +36,42 @@ Servo brushlessMotor3_3;
 Servo brushlessMotor4_4;
 DS18B20 ds18b20(DS18B20_PIN_DQ);
 NewPing hcsr04(HCSR04_PIN_TRIG,HCSR04_PIN_ECHO);
-float x,y,z;
+float xg,yg,zg;
 float xa,ya,za;
 const float a = 0.5;
-double fxa,fya,fza;
-double roll , pitch , yaw;
-
+double fxa = 0;
+double fya = 0;
+double fza = 0;
+double rollA , pitchA , yawA;
+double rollG , pitchG , yawG;
+double gyro_x, gyro_y, gyro_z;
+float previousTime = 0;
+float currentTime = 0;
+float deltaTime;
+float error1;
+float error2;
+float previousError1 = 0;
+float previousError2 = 0;
+////param
+float kp = 0;
+float ki = 10;
+float kd = 0;
+float angleEquilibre = 0;
+float angleActuelX = 0;
+float angleActuelY = 0;
+float throttle = 100;
+float pid_p1 = 0;
+float pid_i1 = 0;
+float pid_d1 = 0;
+float pid_p2 = 0;
+float pid_i2 = 0;
+float pid_d2 = 0;
+float PID1;
+float PID2;
+int pwmM1;
+int pwmM2;
+int pwmM3;
+int pwmM4;
 
 
 void tempGestion(float temp)
@@ -113,34 +145,28 @@ void loop()
     //ajout dans la partie test du capteur ultrasonic afin de tester les fonctions de gestion lié à l'altitude( decollage , atterissage ,sustentation)   
 //////////////////////////////////////////////////////////////////////////////   
     // Disclaimer: The Accelerometer/Magnetometer/Gyroscope + Temp LSM9DS1 is in testing and/or doesn't have code, therefore it may be buggy. Please be kind and report any bugs you may find.
-      fxa = 0;
-      fya = 0;
-      fza = 0;
-      IMU.readGyroscope(x,y,z);
+      
+      IMU.readGyroscope(xg,yg,zg);
       IMU.readAcceleration(xa,ya,za);
       Serial.println("gyro");
-      Serial.println(x);
-      Serial.println(y);
-      Serial.println(z);
+      Serial.println(xg);
+      Serial.println(yg);
+      Serial.println(zg);
       Serial.println("Acceleration");
       Serial.println(xa);
       Serial.println(ya);
       Serial.println(za);
-      //filtre de fluctuation
-      fxa = xa*a+(fxa*(1.0 - a));
-      fya = ya*a+(fya*(1.0 - a));
-      fza = za*a+(fza*(1.0 - a));
-      //calculating roll pitch and yaw;
-      roll = (atan2(fya,fza)*180.0)/M_PI;
-      pitch = (atan2(-fxa , sqrt(fya*fya + fza*fza))*180.0)/M_PI;
-      yaw = 180.0*atan(fza/sqrt(fxa*fxa+fza*fza))/M_PI;  
+     
+     Decollage();
+     Stationnaire();
+     delay(1000);
+     Atterissage(); 
+       
       
-   
 }
 
 
-// Menu function for selecting the components to be tested
-// Follow serial monitor for instrcutions
+
 
 
 /*******************************************************

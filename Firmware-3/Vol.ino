@@ -9,7 +9,11 @@ void Decollage()
   {
     while(hcsr04.ping_cm() != 100)
     {
-        rpmSynchroneAll(brushlessMotor1_1,brushlessMotor2_2,brushlessMotor3_3,brushlessMotor4_4,0,1);
+        PID();
+        brushlessMotor1_1.writeMicroseconds(++pwmM1);
+        brushlessMotor2_2.writeMicroseconds(++pwmM2);
+        brushlessMotor3_3.writeMicroseconds(++pwmM3);
+        brushlessMotor4_4.writeMicroseconds(++pwmM4);
     }
   }
   
@@ -25,7 +29,11 @@ void Atterissage()
     {
       while(hcsr04.ping_cm() != 0)
       {
-        egalizeAll(brushlessMotor1_1,brushlessMotor2_2,brushlessMotor3_3,brushlessMotor4_4,0);
+        PID();
+        brushlessMotor1_1.writeMicroseconds(--pwmM1);
+        brushlessMotor2_2.writeMicroseconds(--pwmM2);
+        brushlessMotor3_3.writeMicroseconds(--pwmM3);
+        brushlessMotor4_4.writeMicroseconds(--pwmM4);
       }
     }
 }
@@ -35,11 +43,20 @@ void Stationnaire()
   if(hcsr04.ping_cm() == 0)
   {
     Decollage();
+    PID();
+    brushlessMotor1_1.writeMicroseconds(pwmM1);
+    brushlessMotor2_2.writeMicroseconds(pwmM2);
+    brushlessMotor3_3.writeMicroseconds(pwmM3);
+    brushlessMotor4_4.writeMicroseconds(pwmM4);
   }
   else
   {
-    IMU.readGyroscope(x,y,z);
-    IMU.readAcceleration(xa,ya,za);
+    
+    PID();
+    brushlessMotor1_1.writeMicroseconds(pwmM1);
+    brushlessMotor2_2.writeMicroseconds(pwmM2);
+    brushlessMotor3_3.writeMicroseconds(pwmM3);
+    brushlessMotor4_4.writeMicroseconds(pwmM4);
     
   }
 }
